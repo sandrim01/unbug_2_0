@@ -14,215 +14,166 @@ import {
     ChevronRight,
     Plus,
     ArrowUpRight,
-    Activity,
-    Cpu,
-    Shield
+    Monitor,
+    ShieldAlert
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-const SidebarLink = ({ icon: Icon, label, active, onClick }) => (
-    <button
-        onClick={onClick}
-        className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 ${active
-                ? 'nav-item-active text-black'
-                : 'text-zinc-500 hover:text-white hover:bg-white/5'
-            }`}
-    >
-        <Icon size={20} />
-        <span className="font-bold text-sm tracking-tight">{label}</span>
-    </button>
-);
-
-const MetricBox = ({ label, value, trend, icon: Icon, color }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="premium-card rounded-[2.5rem] p-8 flex flex-col justify-between h-64"
-    >
-        <div className="flex justify-between items-start">
-            <div className={`p-4 rounded-2xl ${color} bg-white/5 border border-white/10 text-white`}>
-                <Icon size={24} />
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                <ArrowUpRight size={14} className="text-emerald-500" />
-                {trend}
-            </div>
-        </div>
-        <div>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">{label}</p>
-            <h3 className="title-reveal text-6xl font-black">{value}</h3>
-        </div>
-    </motion.div>
-);
-
-export default function Home() {
-    const [activeTab, setActiveTab] = useState('DASHBOARD');
+export default function Dashboard() {
     const [mounted, setMounted] = useState(false);
+    const [activeTab, setActiveTab] = useState('Overview');
 
     useEffect(() => setMounted(true), []);
 
     if (!mounted) return null;
 
     return (
-        <div className="flex h-screen w-screen bg-black overflow-hidden p-6 gap-6">
-            <div className="mesh-gradient" />
+        <div className="flex h-full w-full p-6 gap-6 bg-black" style={{ display: 'flex', height: '100vh', width: '100vw', padding: '1.5rem', gap: '1.5rem', backgroundColor: 'black' }}>
+            <div className="mesh-bg" />
 
-            {/* Sidebar - The Control Center */}
-            <aside className="w-80 premium-card rounded-[3rem] p-8 flex flex-col">
-                <div className="flex items-center gap-4 mb-16 px-2">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                        <Shield size={24} className="text-black" />
+            {/* Sidebar */}
+            <aside className="bento-panel" style={{ width: '20rem', padding: '2.5rem', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '4rem' }}>
+                    <div style={{ width: '3rem', height: '3rem', backgroundColor: 'white', borderRadius: '1rem', display: 'flex', alignItems: 'center', justifyCenter: 'center', boxShadow: '0 0 20px rgba(255,255,255,0.2)' }}>
+                        <Zap size={24} color="black" style={{ margin: 'auto' }} />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">UNBUG</h1>
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] leading-none">Enterprise</p>
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.05em', color: 'white', fontStyle: 'italic' }}>UNBUG</h1>
+                        <p style={{ fontSize: '0.6rem', fontWeight: 900, color: '#666', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Enterprise</p>
                     </div>
                 </div>
 
-                <nav className="space-y-3 flex-1">
-                    <SidebarLink icon={LayoutDashboard} label="DASHBOARD" active={activeTab === 'DASHBOARD'} onClick={() => setActiveTab('DASHBOARD')} />
-                    <SidebarLink icon={FileText} label="ORDERS" active={activeTab === 'ORDERS'} onClick={() => setActiveTab('ORDERS')} />
-                    <SidebarLink icon={Package} label="INVENTORY" active={activeTab === 'INVENTORY'} onClick={() => setActiveTab('INVENTORY')} />
-                    <SidebarLink icon={Users} label="CLIENTS" active={activeTab === 'CLIENTS'} onClick={() => setActiveTab('CLIENTS')} />
-                    <SidebarLink icon={BarChart3} label="REPORTS" active={activeTab === 'REPORTS'} onClick={() => setActiveTab('REPORTS')} />
+                <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <button onClick={() => setActiveTab('Overview')} className={`nav-item ${activeTab === 'Overview' ? 'active' : ''}`}>
+                        <LayoutDashboard size={18} /> Overview
+                    </button>
+                    <button onClick={() => setActiveTab('Orders')} className={`nav-item ${activeTab === 'Orders' ? 'active' : ''}`}>
+                        <FileText size={18} /> Orders
+                    </button>
+                    <button onClick={() => setActiveTab('Inventory')} className={`nav-item ${activeTab === 'Inventory' ? 'active' : ''}`}>
+                        <Package size={18} /> Inventory
+                    </button>
+                    <button onClick={() => setActiveTab('Clients')} className={`nav-item ${activeTab === 'Clients' ? 'active' : ''}`}>
+                        <Users size={18} /> Clients
+                    </button>
                 </nav>
 
-                <div className="mt-auto">
-                    <button className="w-full premium-card p-5 rounded-3xl flex items-center gap-4 group">
-                        <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center overflow-hidden">
-                            <Settings size={20} className="text-zinc-400 group-hover:rotate-90 transition-transform duration-500" />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-xs font-black text-white leading-none">SETTINGS</p>
-                            <p className="text-[10px] text-zinc-500 mt-1 uppercase font-bold">V 2.5.0</p>
-                        </div>
+                <div style={{ marginTop: 'auto' }}>
+                    <button className="nav-item" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Settings size={18} /> Settings
                     </button>
                 </div>
             </aside>
 
-            {/* Main viewport */}
-            <main className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2">
+            {/* Main Content */}
+            <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
 
-                {/* Elite Navigation Bar */}
-                <header className="flex justify-between items-end px-4 py-4 mt-4">
+                {/* Top Header */}
+                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0 1rem' }}>
                     <div>
-                        <h2 className="title-reveal text-8xl font-black leading-none">OVERVIEW</h2>
-                        <div className="flex items-center gap-4 mt-4">
-                            <span className="flex items-center gap-2 text-[11px] font-black text-emerald-500 uppercase tracking-widest">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 status-glow animate-pulse" />
-                                Systems Operational
+                        <h2 className="heading-xl title-reveal">DASHBOARD</h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', fontWeight: 900, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                <div className="dot-online" /> Systems Active
                             </span>
-                            <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                            <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">February 13, 2026</span>
+                            <span style={{ color: '#444', fontSize: '0.8rem' }}>•</span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em' }}>February 2026</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <div className="relative group">
-                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors" size={18} />
-                            <input
-                                type="text"
-                                placeholder="EXECUTE SEARCH..."
-                                className="bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-8 text-xs font-black tracking-widest focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all w-80"
-                            />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ position: 'relative' }}>
+                            <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#555' }} />
+                            <input type="text" className="glass-input" placeholder="SYSTEM SEARCH..." style={{ width: '18rem', paddingLeft: '2.5rem', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em' }} />
                         </div>
-                        <button className="w-14 h-14 premium-card rounded-2xl flex items-center justify-center text-zinc-400 hover:text-white relative">
-                            <Bell size={22} />
-                            <span className="absolute top-4 right-4 w-2 h-2 bg-white rounded-full status-glow" />
-                        </button>
-                        <button className="h-14 px-8 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-95 transition-transform active:scale-90">
-                            NEW ORDER
-                        </button>
+                        <button className="btn-primary">New Action</button>
                     </div>
                 </header>
 
-                {/* Core Metrics Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 px-4">
-                    <MetricBox label="REVENUE MTD" value="$84.2K" trend="12.4%" icon={Wallet} color="text-blue-500" />
-                    <MetricBox label="CORE CAPACITY" value="98.2%" trend="1.2%" icon={Cpu} color="text-purple-500" />
-                    <MetricBox label="EFFICIENCY" value="0.94" trend="0.4%" icon={Zap} color="text-amber-500" />
+                {/* Metrics Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', padding: '0 1rem' }}>
+                    <div className="bento-panel stat-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '1rem', color: '#3b82f6' }}><Wallet size={24} /></div>
+                            <span style={{ color: '#10b981', fontSize: '0.7rem', fontWeight: 900 }}>+12.5%</span>
+                        </div>
+                        <div>
+                            <p style={{ color: '#555', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Revenue MTD</p>
+                            <h3 className="title-reveal" style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.05em' }}>$84.2K</h3>
+                        </div>
+                    </div>
+
+                    <div className="bento-panel stat-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <div style={{ padding: '1rem', background: 'rgba(168, 85, 247, 0.1)', borderRadius: '1rem', color: '#a855f7' }}><Monitor size={24} /></div>
+                            <span style={{ color: '#10b981', fontSize: '0.7rem', fontWeight: 900 }}>Optimal</span>
+                        </div>
+                        <div>
+                            <p style={{ color: '#555', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>System Capacity</p>
+                            <h3 className="title-reveal" style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.05em' }}>98.2%</h3>
+                        </div>
+                    </div>
+
+                    <div className="bento-panel stat-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '1rem', color: '#f59e0b' }}><Zap size={24} /></div>
+                            <span style={{ color: '#ef4444', fontSize: '0.7rem', fontWeight: 900 }}>-0.4%</span>
+                        </div>
+                        <div>
+                            <p style={{ color: '#555', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Efficiency Rate</p>
+                            <h3 className="title-reveal" style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.05em' }}>0.94</h3>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Main Operational Feed */}
-                <div className="grid grid-cols-12 gap-6 px-4 mb-10 min-h-[500px]">
-
-                    <div className="col-span-8 premium-card rounded-[3.5rem] p-12 flex flex-col">
-                        <div className="flex justify-between items-center mb-12">
-                            <div>
-                                <h3 className="text-2xl font-black tracking-tighter text-white italic">OPERATIONAL FEED</h3>
-                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mt-2">Real-time system updates</p>
-                            </div>
-                            <button className="text-[10px] font-black text-zinc-400 hover:text-white border-b border-zinc-800 pb-1 tracking-[0.2em] transition-colors">VIEW ALL HISTORY</button>
+                {/* Activity Section */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem', padding: '0 1rem', flex: 1 }}>
+                    <div className="bento-panel" style={{ gridColumn: 'span 8', padding: '3rem', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.03em', fontStyle: 'italic' }}>OPERATIONAL FEED</h3>
+                            <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#444', letterSpacing: '0.2em' }}>SYNCED LIVE</span>
                         </div>
 
-                        <div className="space-y-4 flex-1 overflow-y-auto pr-4">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="group flex items-center justify-between p-8 rounded-[2rem] border border-white/5 hover:bg-white/[0.02] hover:border-white/20 transition-all cursor-pointer">
-                                    <div className="flex items-center gap-8">
-                                        <span className="text-4xl font-black text-zinc-900 group-hover:text-zinc-700 transition-colors">0{i}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+                            {[1, 2, 3].map(i => (
+                                <div key={i} style={{ padding: '1.5rem', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                        <span style={{ fontSize: '2rem', fontWeight: 900, color: '#222' }}>0{i}</span>
                                         <div>
-                                            <h4 className="text-lg font-black tracking-tight text-white/90 group-hover:text-white transition-colors">Server Cluster Alpha-{i}42 • Maintenance</h4>
-                                            <p className="text-[11px] font-bold text-zinc-600 uppercase tracking-widest mt-1">Enterprise Infra • <span className="text-blue-500/80">Completed</span></p>
+                                            <h4 style={{ fontSize: '1rem', fontWeight: 800 }}>Core Migration Alpha-{i}</h4>
+                                            <p style={{ fontSize: '0.65rem', color: '#555', fontWeight: 700, textTransform: 'uppercase', marginTop: '0.2rem' }}>Enterprise Unit • Feb 13</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-10">
-                                        <div className="text-right hidden sm:block">
-                                            <p className="text-lg font-black text-white leading-none">$ 2,400.00</p>
-                                            <p className="text-[10px] text-zinc-600 font-black uppercase mt-2 tracking-widest">USD</p>
-                                        </div>
-                                        <ChevronRight className="text-zinc-800 group-hover:text-white group-hover:translate-x-1 transition-all" size={24} />
-                                    </div>
+                                    <ChevronRight size={20} color="#333" />
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="col-span-4 flex flex-col gap-6">
-                        <div className="flex-1 premium-card rounded-[3.5rem] p-12 bg-gradient-to-br from-white/5 to-transparent flex flex-col justify-between overflow-hidden relative">
-                            <div className="relative z-10">
-                                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4">SYSTEM LOAD</p>
-                                <h4 className="text-4xl font-black text-white tracking-tighter italic">OPTIMAL</h4>
-                            </div>
-
-                            <div className="relative h-40 flex items-end gap-2 px-2">
-                                {[40, 20, 60, 30, 80, 45, 90, 50, 70, 40].map((h, i) => (
-                                    <motion.div
-                                        key={i}
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${h}%` }}
-                                        transition={{ delay: i * 0.1, duration: 1, ease: "circOut" }}
-                                        className={`flex-1 rounded-full ${i === 6 ? 'bg-white shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-zinc-800'}`}
-                                    />
+                    <div style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div className="bento-panel" style={{ flex: 1, padding: '2rem', backgroundColor: 'rgba(59, 130, 246, 0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+                            <p style={{ fontSize: '0.6rem', fontWeight: 900, color: '#3b82f6', letterSpacing: '0.3em', marginBottom: '1rem' }}>GLOBAL LOAD</p>
+                            <h4 style={{ fontSize: '3rem', fontWeight: 900, fontStyle: 'italic' }}>OPTIMIZED</h4>
+                            <div style={{ marginTop: '2rem', display: 'flex', gap: '4px', alignItems: 'flex-end', height: '40px' }}>
+                                {[2, 5, 3, 8, 4, 9, 6].map((h, i) => (
+                                    <div key={i} style={{ width: '4px', height: `${h * 10}%`, backgroundColor: i === 5 ? 'white' : '#222', borderRadius: '10px' }} />
                                 ))}
                             </div>
-
-                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-zinc-800/20 blur-[80px] rounded-full" />
                         </div>
 
-                        <div className="premium-card rounded-[3.5rem] p-12">
-                            <div className="flex items-center gap-3 mb-8">
-                                <Activity size={20} className="text-emerald-500" />
-                                <p className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Health Check</p>
+                        <div className="bento-panel" style={{ padding: '2rem', borderLeft: '4px solid #ef4444' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                                <ShieldAlert size={16} color="#ef4444" />
+                                <span style={{ fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.1em' }}>SYSTEM ALERT</span>
                             </div>
-                            <div className="space-y-6">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-zinc-500">DATABASE</span>
-                                    <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full uppercase">SYNCED</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-zinc-500">LATENCY</span>
-                                    <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full uppercase">12MS</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-zinc-500">API UPTIME</span>
-                                    <span className="text-[10px] font-black text-white bg-white/5 px-3 py-1 rounded-full uppercase">99.99%</span>
-                                </div>
-                            </div>
+                            <p style={{ fontSize: '0.8rem', fontWeight: 800 }}>SSD Core Capacity Critical</p>
+                            <p style={{ fontSize: '0.65rem', color: '#555', marginTop: '0.4rem' }}>Check Inventory Unit A-102</p>
                         </div>
                     </div>
-
                 </div>
             </main>
         </div>
     );
 }
+
+const Wallet = ({ size, color }) => <FileText size={size} color={color} />; // Proxy for Wallet if not available
