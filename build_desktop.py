@@ -31,6 +31,15 @@ PyInstaller.__main__.run([
     '--hidden-import=socketio',
     '--hidden-import=proxy_tools',
     '--hidden-import=psutil',
+    '--hidden-import=pandas',
+    '--hidden-import=matplotlib',
+    '--hidden-import=openpyxl',
+    '--exclude-module=torch',
+    '--exclude-module=scipy',
+    '--exclude-module=transformers',
+    '--exclude-module=sentence_transformers',
+    '--exclude-module=faiss',
+    '--exclude-module=nvidia',
 ])
 
 print("Build concluído com sucesso! O executável está na pasta 'dist'.")

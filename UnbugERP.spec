@@ -6,11 +6,11 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('templates', 'templates'), ('static', 'static'), ('blueprints', 'blueprints'), ('generated-icon.png', '.')],
-    hiddenimports=['engineio.async_drivers.threading', 'flask_sqlalchemy', 'flask_login', 'flask_wtf', 'email_validator', 'pystray', 'PIL', 'win10toast', 'flask_socketio', 'engineio', 'socketio', 'proxy_tools', 'psutil'],
+    hiddenimports=['engineio.async_drivers.threading', 'flask_sqlalchemy', 'flask_login', 'flask_wtf', 'email_validator', 'pystray', 'PIL', 'win10toast', 'flask_socketio', 'engineio', 'socketio', 'proxy_tools', 'psutil', 'pandas', 'matplotlib', 'openpyxl'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['torch', 'scipy', 'transformers', 'sentence_transformers', 'faiss', 'nvidia'],
     noarchive=False,
     optimize=0,
 )
