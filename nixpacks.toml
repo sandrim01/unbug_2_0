@@ -1,10 +1,12 @@
-[phases.setup]
-nixPkgs = ["python311", "nodejs_20"]
-
 [phases.install]
-cmds = ["pip install -r requirements.txt", "cd web && npm install"]
+dependsOn = ["setup"]
+cmds = ["python -m venv /opt/venv", "/opt/venv/bin/pip install -r requirements.txt", "cd web && npm install"]
+
+[phases.setup]
+nixPkgs = ["python311", "nodejs_20", "gcc"]
 
 [phases.build]
+dependsOn = ["install"]
 cmds = ["cd web && npm run build"]
 
 [start]
