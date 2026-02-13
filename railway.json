@@ -1,0 +1,9 @@
+[build
+]
+builder = "nixpacks"
+# Using nixpacks to handle the dual nature of the project (Node + Python)
+
+[deploy
+]
+startCommand = "bash start.sh"
+healthCheckPath = "/api/health"
