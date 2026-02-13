@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
-from app import db
+from extensions import db
 from models import User, Employee, ActivityLog
 from sqlalchemy import func, text
 from werkzeug.security import generate_password_hash
@@ -8,9 +8,9 @@ import os
 import platform
 import psutil
 import datetime
+import subprocess
 import forms
 import time
-from flask import request
 from models import ActivityLog
 
 security_bp = Blueprint('security', __name__, url_prefix='/security')
@@ -213,6 +213,26 @@ def edit_user(id):
 def toggle_user(id):
     """Ativa/desativa um usuário"""
     user = User.query.get_or_404(id)
+    
+    if user.username == 'admin':
+        flash('Não é possível desativar o usuário administrador principal.', 'danger')
+    else:
+        user.is_active = not user.is_active
+        status = 'ativado' if user.is_active else 'desativado'
+        db.session.commit()
+
+        # Registrar atividade de ativação/desativação de usuário
+        ActivityLog.log_activity(
+            username=current_user.username,
+            activity=f'Usuário "{user.username}" foi {status}',
+            ip_address=request.remote_addr,
+            user_id=current_user.id,
+            category='usuários'
+        )
+
+        flash(f'Usuário "{user.username}" {status} com sucesso.', 'success')
+
+    return redirect(url_for('security.users'))
 
 
 @security_bp.route('/config/git', methods=['GET', 'POST'])
@@ -268,26 +288,6 @@ def git_config():
 
     # GET request - mostra formulário
     return render_template('security/git_config.html')
-
-    if user.username == 'admin':
-        flash('Não é possível desativar o usuário administrador principal.', 'danger')
-    else:
-        user._is_active = not user._is_active
-        status = 'ativado' if user._is_active else 'desativado'
-        db.session.commit()
-
-        # Registrar atividade de ativação/desativação de usuário
-        ActivityLog.log_activity(
-            username=current_user.username,
-            activity=f'Usuário "{user.username}" foi {status}',
-            ip_address=request.remote_addr,
-            user_id=current_user.id,
-            category='usuários'
-        )
-
-        flash(f'Usuário "{user.username}" {status} com sucesso.', 'success')
-
-    return redirect(url_for('security.users'))
 
 
 @security_bp.route('/user/reset_password/<int:id>', methods=['POST'])

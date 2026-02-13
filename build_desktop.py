@@ -30,6 +30,7 @@ PyInstaller.__main__.run([
     '--hidden-import=engineio',
     '--hidden-import=socketio',
     '--hidden-import=proxy_tools',
+    '--hidden-import=psutil',
 ])
 
 print("Build concluído com sucesso! O executável está na pasta 'dist'.")
