@@ -14,207 +14,160 @@ import {
     LayoutDashboard,
     Search,
     Bell,
-    LogOut,
-    TrendingUp,
-    Clock
+    ArrowUpRight,
+    Monitor,
+    ShieldCheck,
+    Zap
 } from 'lucide-react';
-import { useState } from 'react';
 
-const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
-    <button
-        onClick={onClick}
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl nav-item ${active ? 'active' : ''}`}
-    >
-        <Icon size={20} className={active ? 'text-primary' : ''} />
-        <span className="font-medium text-sm">{label}</span>
-        {active && <motion.div layoutId="activeNav" className="ml-auto w-1 h-5 bg-primary rounded-full" />}
+const NavItem = ({ icon: Icon, label, active }) => (
+    <button className={`group flex items-center gap-4 py-3 px-4 rounded-xl transition-all ${active ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+        <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+        <span className="text-sm font-bold tracking-tight">{label}</span>
     </button>
 );
 
-const StatCard = ({ title, value, change, icon: Icon, gradient }) => (
+const MetricCard = ({ label, value, trend, icon: Icon, color }) => (
     <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card rounded-3xl p-6 relative overflow-hidden group"
+        whileHover={{ y: -5 }}
+        className="obsidian-card p-8 rounded-[2rem] flex flex-col justify-between h-56"
     >
-        <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity bg-gradient-to-br ${gradient}`} />
-
-        <div className="flex justify-between items-start mb-4">
-            <div className={`p-3 rounded-2xl bg-gradient-to-br ${gradient} bg-opacity-10 text-white shadow-lg`}>
-                <Icon size={22} />
+        <div className="flex justify-between items-start">
+            <div className={`p-4 rounded-2xl ${color} bg-opacity-10 text-white shadow-2xl`}>
+                <Icon size={24} />
             </div>
-            <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
-                <TrendingUp size={14} />
-                {change}
+            <div className="flex items-center gap-1 text-[10px] font-black tracking-widest text-zinc-500 uppercase">
+                <ArrowUpRight size={14} className="text-emerald-500" />
+                {trend}
             </div>
         </div>
-
         <div>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{title}</p>
-            <h3 className="text-white text-3xl font-bold mt-1 tracking-tight">{value}</h3>
+            <p className="subheading-elite text-[10px] mb-2 uppercase">{label}</p>
+            <h3 className="heading-elite text-5xl font-black">{value}</h3>
         </div>
     </motion.div>
 );
 
 export default function Dashboard() {
-    const [activeNav, setActiveNav] = useState('Painel');
-
     return (
-        <div className="min-h-screen bg-transparent flex">
-            {/* Mesh Background */}
-            <div className="bg-mesh" />
+        <div className="flex h-screen w-screen p-6 gap-6 bg-black overflow-hidden select-none">
+            <div className="mesh-bg" />
 
-            {/* Sidebar */}
-            <aside className="w-64 glass-panel border-r border-white/5 p-6 flex flex-col fixed h-full z-50">
-                <div className="flex items-center gap-3 mb-10 px-2">
-                    <div className="w-10 h-10 rounded-xl premium-btn flex items-center justify-center font-bold text-xl text-white">U</div>
-                    <span className="text-xl font-bold tracking-tight text-white">Unbug<span className="text-primary text-2xl">.</span></span>
+            {/* Ultra Minimal Sidebar */}
+            <aside className="w-20 lg:w-64 obsidian-card rounded-[2.5rem] p-8 flex flex-col items-center lg:items-stretch h-full">
+                <div className="flex items-center gap-3 mb-16 px-2">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+                        <ShieldCheck size={24} className="text-black" />
+                    </div>
+                    <span className="hidden lg:block text-2xl font-black tracking-tighter text-white uppercase italic">UNBUG</span>
                 </div>
 
-                <nav className="space-y-2 flex-1">
-                    <SidebarItem icon={LayoutDashboard} label="Painel" active={activeNav === 'Painel'} onClick={() => setActiveNav('Painel')} />
-                    <SidebarItem icon={FileText} label="Serviços" active={activeNav === 'Serviços'} onClick={() => setActiveNav('Serviços')} />
-                    <SidebarItem icon={Package} label="Estoque" active={activeNav === 'Estoque'} onClick={() => setActiveNav('Estoque')} />
-                    <SidebarItem icon={Users} label="Clientes" active={activeNav === 'Clientes'} onClick={() => setActiveNav('Clientes')} />
-                    <SidebarItem icon={BarChart3} label="Relatórios" active={activeNav === 'Relatórios'} onClick={() => setActiveNav('Relatórios')} />
-                    <SidebarItem icon={Settings} label="Ajustes" active={activeNav === 'Ajustes'} onClick={() => setActiveNav('Ajustes')} />
+                <nav className="space-y-4 flex-1">
+                    <NavItem icon={LayoutDashboard} label="Dashboard" active />
+                    <NavItem icon={FileText} label="Orders" />
+                    <NavItem icon={Package} label="Inventory" />
+                    <NavItem icon={Users} label="Clients" />
+                    <NavItem icon={BarChart3} label="Reports" />
                 </nav>
 
-                <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
-                    <LogOut size={20} />
-                    <span className="font-medium text-sm">Sair</span>
-                </button>
+                <div className="mt-auto">
+                    <button className="w-full btn-icon p-4 rounded-2xl flex items-center justify-center gap-2 group">
+                        <Settings size={20} className="group-hover:rotate-90 transition-transform" />
+                        <span className="hidden lg:block text-xs font-black uppercase tracking-widest">Settings</span>
+                    </button>
+                </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 ml-64 p-8">
-                {/* Top Header */}
-                <header className="flex justify-between items-center mb-10">
-                    <div className="flex items-center gap-4 flex-1 max-w-xl">
-                        <div className="relative w-full group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" size={18} />
-                            <input
-                                type="text"
-                                placeholder="Pesquisar OS, Clientes ou Peças..."
-                                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all focus:ring-4 ring-primary/10"
-                            />
-                        </div>
+            {/* Main Experience */}
+            <main className="flex-1 flex flex-col gap-6 h-full overflow-y-auto custom-scroll pr-2">
+
+                {/* Elite Header */}
+                <header className="flex justify-between items-center px-4 shrink-0">
+                    <div>
+                        <h1 className="heading-elite text-6xl font-black">OVERVIEW</h1>
+                        <p className="subheading-elite text-[12px] mt-2">SYSTEM STATUS: <span className="text-emerald-500">OPERATIONAL</span> • FEB 2026</p>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <button className="relative text-slate-400 hover:text-white transition-colors">
-                            <Bell size={22} />
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#020617]" />
-                        </button>
-                        <div className="h-8 w-[1px] bg-white/10" />
-                        <div className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-white/5 transition-colors cursor-pointer">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold border-2 border-white/10">AD</div>
-                            <div className="hidden md:block text-left">
-                                <p className="text-sm font-bold text-white leading-none">Administrador</p>
-                                <p className="text-[10px] text-slate-500 font-medium tracking-wide mt-1 uppercase">Admin Master</p>
-                            </div>
+                    <div className="flex items-center gap-4">
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                            <input
+                                type="text"
+                                placeholder="COMMAND SEARCH..."
+                                className="bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-xs font-bold tracking-widest focus:outline-none focus:border-white/30 transition-all"
+                            />
                         </div>
+                        <button className="btn-obsidian uppercase tracking-wider">NEW PROJECT</button>
                     </div>
                 </header>
 
-                {/* Welcome Section */}
-                <div className="mb-10 animate-in">
-                    <h2 className="text-4xl font-bold text-white tracking-tight">Painel Executivo</h2>
-                    <p className="text-slate-400 mt-2 font-medium flex items-center gap-2">
-                        <Clock size={16} />
-                        Sexta-feira, 13 de Fevereiro | <span className="text-primary font-semibold">Tudo em dia</span>
-                    </p>
+                {/* Triple Bento Grid Metrics */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4">
+                    <MetricCard label="Revenue MTD" value="$84.2K" trend="12.5%" icon={Wallet} color="bg-blue-600" />
+                    <MetricCard label="Total Assets" value="1.24K" trend="8.1%" icon={Monitor} color="bg-purple-600" />
+                    <MetricCard label="Efficiency" value="98.2%" trend="1.4%" icon={Zap} color="bg-amber-600" />
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                    <StatCard title="OS Pendentes" value="12" change="+3.2%" icon={FileText} gradient="from-amber-400 to-orange-500" />
-                    <StatCard title="Faturamento" value="R$ 15.420" change="+12.5%" icon={Wallet} gradient="from-emerald-400 to-teal-500" />
-                    <StatCard title="Clientes Ativos" value="158" change="+8.1%" icon={Users} gradient="from-indigo-400 to-blue-500" />
-                    <StatCard title="Casos Abertos" value="5" change="-2.4%" icon={Ticket} gradient="from-rose-400 to-pink-500" />
-                </div>
+                {/* Activity & Trends Bento */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 flex-1">
 
-                {/* Main Sections */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Recent Activity Table */}
-                    <div className="lg:col-span-2">
-                        <div className="glass-card rounded-[32px] p-8">
-                            <div className="flex justify-between items-center mb-8">
-                                <h3 className="text-xl font-bold text-white">Ordens de Serviço Ativas</h3>
-                                <button className="text-sm font-bold text-primary hover:text-indigo-400 transition-colors">Visualizar Todas</button>
+                    {/* Main Feed - Bento 8/12 */}
+                    <div className="lg:col-span-8 obsidian-card rounded-[3rem] p-10 flex flex-col">
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-2xl font-black italic tracking-tighter">LIVE FEED</h2>
+                            <div className="flex gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em]">Sincronizado</span>
                             </div>
+                        </div>
 
-                            <div className="space-y-2">
-                                {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="group flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/5">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-primary/20 transition-all leading-none focus:outline-none focus:ring-0">
-                                                <FileText size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="text-white font-bold text-sm tracking-tight leading-none mb-1">Manutenção Servidor Dell - OS 1420{i}</p>
-                                                <p className="text-xs text-slate-500 font-medium">TechCorp Solutions • <span className="text-slate-600 italic">Há 2 horas</span></p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-6">
-                                            <div className="text-right hidden sm:block">
-                                                <p className="text-white font-bold text-sm leading-none mb-1">R$ 1.450</p>
-                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-right">Crédito</p>
-                                            </div>
-                                            <span className="px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                                Concluído
-                                            </span>
-                                            <ChevronRight className="text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all" size={18} />
+                        <div className="flex-1 space-y-4 overflow-y-auto pr-4">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <div key={i} className="group p-6 rounded-3xl border border-white/5 hover:bg-white/5 transition-all flex items-center justify-between cursor-pointer">
+                                    <div className="flex items-center gap-6">
+                                        <p className="text-3xl font-black text-white/10 group-hover:text-white/40 transition-colors">0{i}</p>
+                                        <div>
+                                            <h4 className="font-black tracking-tight text-white group-hover:text-blue-400 transition-colors">System Core Migration • Stage {i}</h4>
+                                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Enterprise • Feb {12 + i}, 2026</p>
                                         </div>
                                     </div>
-                                ))}
+                                    <ArrowUpRight size={20} className="text-zinc-800 group-hover:text-white transition-all transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Quick Stats - Bento 4/12 */}
+                    <div className="lg:col-span-4 flex flex-col gap-6">
+                        <div className="flex-1 obsidian-card rounded-[3rem] p-10 bg-gradient-to-br from-white/5 to-transparent relative group overflow-hidden">
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-500 mb-8">Status Quota</h3>
+                            <div className="flex items-center justify-center p-8">
+                                <div className="w-40 h-40 rounded-full border-[10px] border-zinc-900 border-t-white relative animate-[spin_10s_linear_infinite]">
+                                    <div className="absolute inset-x-0 inset-y-0 m-auto w-4 h-4 rounded-full bg-white shadow-[0_0_20px_#fff]" />
+                                </div>
+                            </div>
+                            <div className="text-center mt-4">
+                                <p className="text-4xl font-black heading-elite tracking-tighter">92%</p>
+                                <p className="text-[10px] font-black text-zinc-600 mt-2 uppercase tracking-widest">Global Performance</p>
+                            </div>
+                            <div className="absolute top-0 right-0 p-8 scale-150 rotate-12 opacity-5 translate-x-1/2 -translate-y-1/2">
+                                <Monitor size={120} />
+                            </div>
+                        </div>
+
+                        <div className="obsidian-card rounded-[3rem] p-10 flex flex-col gap-4">
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Inventory Alertas</p>
+                            <div className="flex justify-between items-center group">
+                                <span className="text-xs font-bold group-hover:text-white transition-colors">Core Unit [SSD-X]</span>
+                                <span className="px-3 py-1 rounded-lg bg-rose-500/10 text-rose-500 text-[10px] font-black">2 CRITICAL</span>
+                            </div>
+                            <div className="flex justify-between items-center group">
+                                <span className="text-xs font-bold group-hover:text-white transition-colors">Network Patch [A1]</span>
+                                <span className="px-3 py-1 rounded-lg bg-amber-500/10 text-amber-500 text-[10px] font-black">REQ REFILL</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Quick Actions & Low Stock */}
-                    <div className="space-y-8">
-                        <div className="glass-card rounded-[32px] p-8">
-                            <h3 className="text-lg font-bold text-white mb-6">Ações Executivas</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <button className="p-4 rounded-3xl bg-primary/10 border border-primary/20 flex flex-col items-center gap-2 hover:bg-primary transition-all group overflow-hidden relative">
-                                    <Plus className="text-primary group-hover:text-white transition-colors" size={24} />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary group-hover:text-white transition-colors">Nova OS</span>
-                                </button>
-                                <button className="p-4 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center gap-2 hover:bg-white/10 transition-all group">
-                                    <Package className="text-slate-400 group-hover:text-white transition-colors" size={24} />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-white transition-colors">Estoque</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="glass-card rounded-[32px] p-8 bg-gradient-to-br from-rose-500/10 to-transparent border-l-4 border-l-rose-500">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="p-2 bg-rose-500 rounded-lg shadow-lg shadow-rose-500/30">
-                                    <Package size={18} className="text-white" />
-                                </div>
-                                <h3 className="text-lg font-bold text-white">Alerta Estoque</h3>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center group cursor-default">
-                                    <div>
-                                        <p className="text-white text-sm font-bold leading-none mb-1">SSD 240GB Kingston</p>
-                                        <p className="text-[10px] text-slate-500 font-medium">Peça Hardware</p>
-                                    </div>
-                                    <span className="text-rose-500 font-black text-sm p-1.5 px-3 rounded-lg bg-rose-500/10">2U</span>
-                                </div>
-                                <div className="h-[1px] bg-white/5" />
-                                <div className="flex justify-between items-center group cursor-default">
-                                    <div>
-                                        <p className="text-white text-sm font-bold leading-none mb-1">Cabo de Rede CAT6</p>
-                                        <p className="text-[10px] text-slate-500 font-medium">Infraestrutura</p>
-                                    </div>
-                                    <span className="text-amber-500 font-black text-sm p-1.5 px-3 rounded-lg bg-amber-500/10">15m</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
