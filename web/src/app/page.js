@@ -17,97 +17,220 @@ import {
     ShieldCheck
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion'; // Added framer-motion import
 
 export default function Dashboard() {
     const [mounted, setMounted] = useState(false);
     const [activeTab, setActiveTab] = useState('Visão Geral');
 
-    useEffect(() => setMounted(true), []);
+    // Data States
+    const [data, setData] = useState({
+        tickets: [],
+        clients: [],
+        inventory: [],
+        finance: []
+    });
+    const [loading, setLoading] = useState(true);
+
+    // UI States
+    const [modal, setModal] = useState({ show: false, type: null }); // type: 'client', 'ticket', 'inventory', 'finance'
+    const [form, setForm] = useState({});
+
+    useEffect(() => {
+        setMounted(true);
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // Simulate API calls
+            const [tRes, cRes, iRes, fRes] = await Promise.all([
+                Promise.resolve({
+                    json: () => ([
+                        { id: '8842', subject: 'Manutenção Servidor', priority: 'high', status: 'open', client_id: '1' },
+                        { id: '8843', subject: 'Configuração VPN', priority: 'medium', status: 'pending', client_id: '2' },
+                        { id: '8844', subject: 'Upgrade Hardware', priority: 'low', status: 'closed', client_id: '3' }
+                    ])
+                }),
+                Promise.resolve({
+                    json: () => ([
+                        { id: '1', name: 'Alpha Corp', document: '12.345.678/0001-90', email: 'contact@alpha.com', status: 'active' },
+                        { id: '2', name: 'Beta Systems', document: '98.765.432/0001-10', email: 'info@beta.com', status: 'active' }
+                    ])
+                }),
+                Promise.resolve({
+                    json: () => ([
+                        { id: '101', name: 'Servidor Dell R740', sku: 'SRV-DEL-R740', quantity: 5, unit_price: '15000.00', location: 'Rack A1' },
+                        { id: '102', name: 'Switch Cisco Catalyst', sku: 'SW-CIS-CAT', quantity: 12, unit_price: '2500.00', location: 'Rack B2' }
+                    ])
+                }),
+                Promise.resolve({
+                    json: () => ([
+                        { id: '201', date: new Date().toISOString(), type: 'income', amount: '10000.00', description: 'Serviços de Consultoria', category: 'Serviços' },
+                        { id: '202', date: new Date().toISOString(), type: 'expense', amount: '1500.00', description: 'Aluguel Escritório', category: 'Despesas Fixas' }
+                    ])
+                })
+            ]);
+
+            setData({
+                tickets: await tRes.json() || [],
+                clients: await cRes.json() || [],
+                inventory: await iRes.json() || [],
+                finance: await fRes.json() || []
+            });
+        } catch (error) {
+            console.error("Fetch error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAction = async (e) => {
+        e.preventDefault();
+        const endpoint = {
+            client: '/api/clients/',
+            ticket: '/api/tickets/',
+            inventory: '/api/inventory/',
+            finance: '/api/finance/'
+        }[modal.type];
+
+        try {
+            // Simulate API call
+            console.log(`Submitting to ${endpoint}:`, form);
+            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+
+            setModal({ show: false, type: null });
+            setForm({});
+            fetchData(); // Re-fetch data to update UI
+        } catch (error) {
+            alert("Erro ao salvar dados.");
+        }
+    };
 
     if (!mounted) return null;
 
+    const Modal = () => {
+        if (!modal.show) return null;
+        return (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="panel" style={{ width: '500px', padding: '2.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>ADICIONAR {modal.type?.toUpperCase()}</h2>
+                        <button onClick={() => setModal({ show: false })} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>Fechar</button>
+                    </div>
+                    <form onSubmit={handleAction} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                        {modal.type === 'client' && (
+                            <>
+                                <input required placeholder="Nome do Cliente" className="input-field" onChange={e => setForm({ ...form, name: e.target.value })} />
+                                <input placeholder="Documento (CPF/CNPJ)" className="input-field" onChange={e => setForm({ ...form, document: e.target.value })} />
+                                <input required type="email" placeholder="E-mail" className="input-field" onChange={e => setForm({ ...form, email: e.target.value })} />
+                                <input placeholder="Telefone" className="input-field" onChange={e => setForm({ ...form, phone: e.target.value })} />
+                            </>
+                        )}
+                        {modal.type === 'ticket' && (
+                            <>
+                                <input required placeholder="Assunto" className="input-field" onChange={e => setForm({ ...form, subject: e.target.value })} />
+                                <textarea required rows={4} placeholder="Descrição" className="input-field" style={{ resize: 'none' }} onChange={e => setForm({ ...form, description: e.target.value })} />
+                                <select className="input-field" onChange={e => setForm({ ...form, priority: e.target.value })}>
+                                    <option value="low">Baixa</option>
+                                    <option value="medium">Média</option>
+                                    <option value="high">Alta</option>
+                                </select>
+                                <select required className="input-field" onChange={e => setForm({ ...form, client_id: e.target.value })}>
+                                    <option value="">Selecione um Cliente</option>
+                                    {data.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </>
+                        )}
+                        {modal.type === 'inventory' && (
+                            <>
+                                <input required placeholder="Nome do Item" className="input-field" onChange={e => setForm({ ...form, name: e.target.value })} />
+                                <input placeholder="SKU" className="input-field" onChange={e => setForm({ ...form, sku: e.target.value })} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <input required type="number" placeholder="Qtd Inicial" className="input-field" onChange={e => setForm({ ...form, quantity: e.target.value })} />
+                                    <input required type="number" step="0.01" placeholder="Preço Unit." className="input-field" onChange={e => setForm({ ...form, unit_price: e.target.value })} />
+                                </div>
+                                <input placeholder="Localização" className="input-field" onChange={e => setForm({ ...form, location: e.target.value })} />
+                            </>
+                        )}
+                        {modal.type === 'finance' && (
+                            <>
+                                <select required className="input-field" onChange={e => setForm({ ...form, type: e.target.value })}>
+                                    <option value="">Tipo de Movimentação</option>
+                                    <option value="income">Receita (+)</option>
+                                    <option value="expense">Despesa (-)</option>
+                                </select>
+                                <input required type="number" step="0.01" placeholder="Valor (R$)" className="input-field" onChange={e => setForm({ ...form, amount: e.target.value })} />
+                                <input required placeholder="Descrição" className="input-field" onChange={e => setForm({ ...form, description: e.target.value })} />
+                                <input placeholder="Categoria (Ex: Aluguel, Hardware)" className="input-field" onChange={e => setForm({ ...form, category: e.target.value })} />
+                            </>
+                        )}
+                        <button type="submit" className="btn-primary" style={{ padding: '1rem', marginTop: '1rem' }}>SALVAR REGISTRO</button>
+                    </form>
+                </motion.div>
+            </div>
+        )
+    }
+
     const renderContent = () => {
+        if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Sincronizando base de dados...</div>;
+
         switch (activeTab) {
             case 'Visão Geral':
                 return (
                     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        {/* KPI Grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
                             {[
-                                { label: 'Chamados (24h)', value: '38', trend: '+14%', color: '#2563eb' },
-                                { label: 'Clientes Ativos', value: '142', trend: '+2%', color: '#10b981' },
-                                { label: 'Tempo Médio Rec.', value: '1.8h', trend: 'Estável', color: '#6366f1' },
-                                { label: 'Conformidade SLA', value: '99.2%', trend: '+0.4%', color: '#f59e0b' }
+                                { label: 'Chamados Ativos', value: data.tickets.filter(t => t.status === 'open').length, trend: 'Live', color: '#2563eb' },
+                                { label: 'Base de Clientes', value: data.clients.length, trend: 'Total', color: '#10b981' },
+                                { label: 'Itens em Estoque', value: data.inventory.length, trend: 'SKUs', color: '#6366f1' },
+                                { label: 'Saldo Mensal', value: `R$ ${data.finance.reduce((acc, curr) => curr.type === 'income' ? acc + Number(curr.amount) : acc - Number(curr.amount), 0).toFixed(2)}`, trend: 'Ref: Fev/26', color: '#f59e0b' }
                             ].map((stat, i) => (
                                 <div key={i} className="stat-card">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                         <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{stat.label}</span>
-                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: stat.trend.includes('+') ? 'var(--success)' : 'var(--text-secondary)' }}>{stat.trend}</span>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)' }}>{stat.trend}</span>
                                     </div>
                                     <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stat.value}</h3>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Recent Activity Section */}
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
                             <div className="panel" style={{ padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>MONITORAMENTO DE CHAMADOS</h3>
-                                    <button className="nav-link" style={{ width: 'auto', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Relatório Completo</button>
-                                </div>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.5rem' }}>FILA DE TRABALHO (CHAMADOS)</h3>
                                 <table className="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Protocolo</th>
-                                            <th>Cliente</th>
-                                            <th>Assunto</th>
-                                            <th>Status</th>
-                                            <th style={{ textAlign: 'right' }}>Ação</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Ref</th><th>Assunto</th><th>Prioridade</th><th>Status</th></tr></thead>
                                     <tbody>
-                                        {[
-                                            { id: 'OS-8842', client: 'Alpha Corp', subject: 'Manutenção Servidor', status: 'Em Análise', type: 'blue' },
-                                            { id: 'OS-8843', client: 'Beta Systems', subject: 'Configuração VPN', status: 'Pendente', type: 'red' },
-                                            { id: 'OS-8844', client: 'Indústrias Atlas', subject: 'Upgrade Hardware', status: 'Resolvido', type: 'green' }
-                                        ].map((row, i) => (
+                                        {data.tickets.slice(0, 5).map((t, i) => (
                                             <tr key={i}>
-                                                <td style={{ fontWeight: 600 }}>{row.id}</td>
-                                                <td>{row.client}</td>
-                                                <td>{row.subject}</td>
-                                                <td><span className={`badge badge-${row.type}`}>{row.status}</span></td>
-                                                <td style={{ textAlign: 'right' }}>
-                                                    <button style={{ color: 'var(--brand-primary)', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Gerenciar</button>
-                                                </td>
+                                                <td style={{ fontWeight: 700 }}>#{t.id}</td>
+                                                <td>{t.subject}</td>
+                                                <td><span className={`badge badge-${t.priority === 'high' ? 'red' : 'blue'}`}>{t.priority}</span></td>
+                                                <td>{t.status}</td>
                                             </tr>
                                         ))}
+                                        {data.tickets.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>Nenhum chamado pendente</td></tr>}
                                     </tbody>
                                 </table>
                             </div>
-
                             <div className="panel" style={{ padding: '1.5rem' }}>
-                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.5rem' }}>INTEGRIDADE DO SISTEMA</h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                    {[
-                                        { label: 'Cloud Infrastructure', val: 99 },
-                                        { label: 'Database Shard A', val: 84 },
-                                        { label: 'API Endpoints', val: 100 }
-                                    ].map((m, i) => (
-                                        <div key={i}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.5rem' }}>
-                                                <span style={{ color: 'var(--text-secondary)' }}>{m.label}</span>
-                                                <span style={{ fontWeight: 600 }}>{m.val}%</span>
-                                            </div>
-                                            <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px', overflow: 'hidden' }}>
-                                                <div style={{ width: `${m.val}%`, height: '100%', background: m.val > 90 ? 'var(--success)' : 'var(--warning)', borderRadius: '2px' }} />
-                                            </div>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.5rem' }}>ESTADO DE COMPLIANCE</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.5rem' }}>
+                                            <span>Uptime Infraestrutura</span>
+                                            <span>99.9%</span>
                                         </div>
-                                    ))}
-                                </div>
-                                <div style={{ marginTop: '2rem', padding: '1rem', borderRadius: 'var(--radius-sm)', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', fontSize: '0.75rem', fontWeight: 700 }}>
-                                        <ShieldCheck size={14} /> TODOS OS SISTEMAS ONLINE
+                                        <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px' }}>
+                                            <div style={{ width: '99%', height: '100%', background: 'var(--success)' }} />
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '1rem', background: 'rgba(37, 99, 235, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(37, 99, 235, 0.1)' }}>
+                                        <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                            <strong>Nota de Operação:</strong> Todos os clusters de banco de dados operando nominalmente sem latência reportada.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -115,37 +238,86 @@ export default function Dashboard() {
                     </div>
                 );
             case 'Chamados':
+            case 'Clientes':
+            case 'Financeiro':
+            case 'Gestão de Estoque': // Matching current nav or mapping
+                const typeMap = { 'Chamados': 'ticket', 'Clientes': 'client', 'Financeiro': 'finance', 'Gestão de Estoque': 'inventory' };
+                const currentType = typeMap[activeTab] || 'client';
+                const currentData = data[currentType === 'ticket' ? 'tickets' : currentType === 'client' ? 'clients' : currentType === 'finance' ? 'finance' : 'inventory'] || [];
+
                 return (
                     <div style={{ padding: '2rem' }}>
                         <div className="panel" style={{ padding: '2rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                 <div>
-                                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>SISTEMA DE CHAMADOS</h2>
-                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Gerenciamento centralizado de helpdesk.</p>
+                                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>GESTÃO DE {activeTab.toUpperCase()}</h2>
+                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Painel operacional de {activeTab.toLowerCase()}.</p>
                                 </div>
-                                <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <button onClick={() => setModal({ show: true, type: currentType })} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Plus size={16} /> Novo Registro
                                 </button>
                             </div>
-                            <div style={{ border: '1px solid var(--border-main)', borderRadius: 'var(--radius-md)', padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                <Monitor size={48} style={{ margin: '0 auto 1.5rem', opacity: 0.2 }} />
-                                <p style={{ fontSize: '0.875rem' }}>Selecione um filtro para visualizar a base de dados.</p>
-                            </div>
+
+                            <table className="data-table">
+                                <thead>
+                                    {currentType === 'client' && <tr><th>Nome</th><th>Documento</th><th>E-mail</th><th>Status</th></tr>}
+                                    {currentType === 'ticket' && <tr><th>ID</th><th>Assunto</th><th>Prioridade</th><th>Status</th></tr>}
+                                    {currentType === 'inventory' && <tr><th>Item</th><th>SKU</th><th>Quantidade</th><th>Preço</th></tr>}
+                                    {currentType === 'finance' && <tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Descrição</th></tr>}
+                                </thead>
+                                <tbody>
+                                    {currentData.map((item, i) => (
+                                        <tr key={i}>
+                                            {currentType === 'client' && (
+                                                <>
+                                                    <td style={{ fontWeight: 600 }}>{item.name}</td>
+                                                    <td>{item.document}</td>
+                                                    <td>{item.email}</td>
+                                                    <td><span className="badge badge-green">Ativo</span></td>
+                                                </>
+                                            )}
+                                            {currentType === 'ticket' && (
+                                                <>
+                                                    <td style={{ fontWeight: 700 }}>#{item.id}</td>
+                                                    <td>{item.subject}</td>
+                                                    <td><span className={`badge badge-${item.priority === 'high' ? 'red' : 'blue'}`}>{item.priority}</span></td>
+                                                    <td>{item.status}</td>
+                                                </>
+                                            )}
+                                            {currentType === 'inventory' && (
+                                                <>
+                                                    <td style={{ fontWeight: 600 }}>{item.name}</td>
+                                                    <td>{item.sku}</td>
+                                                    <td>{item.quantity} un</td>
+                                                    <td>R$ {item.unit_price}</td>
+                                                </>
+                                            )}
+                                            {currentType === 'finance' && (
+                                                <>
+                                                    <td>{new Date(item.date).toLocaleDateString()}</td>
+                                                    <td><span className={`badge badge-${item.type === 'income' ? 'green' : 'red'}`}>{item.type}</span></td>
+                                                    <td style={{ fontWeight: 700, color: item.type === 'income' ? 'var(--success)' : 'var(--error)' }}>
+                                                        {item.type === 'income' ? '+' : '-'} R$ {item.amount}
+                                                    </td>
+                                                    <td>{item.description}</td>
+                                                </>
+                                            )}
+                                        </tr>
+                                    ))}
+                                    {currentData.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>Nenhum registro encontrado.</td></tr>}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 );
             default:
-                return (
-                    <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        Seção em desenvolvimento.
-                    </div>
-                );
+                return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>Seção em desenvolvimento.</div>;
         }
     };
 
     return (
         <div className="dashboard-container">
-            {/* Sidebar Navigation */}
+            <Modal />
             <aside className="sidebar">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem', padding: '0 0.5rem' }}>
                     <div style={{ width: '32px', height: '32px', background: 'var(--brand-primary)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
@@ -158,21 +330,18 @@ export default function Dashboard() {
                 </div>
 
                 <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <button onClick={() => setActiveTab('Visão Geral')} className={`nav-link ${activeTab === 'Visão Geral' ? 'active' : ''}`}>
-                        <LayoutDashboard size={18} /> Painel de Controle
-                    </button>
-                    <button onClick={() => setActiveTab('Chamados')} className={`nav-link ${activeTab === 'Chamados' ? 'active' : ''}`}>
-                        <LifeBuoy size={18} /> Gestão de Chamados
-                    </button>
-                    <button onClick={() => setActiveTab('Clientes')} className={`nav-link ${activeTab === 'Clientes' ? 'active' : ''}`}>
-                        <Users size={18} /> Base de Clientes
-                    </button>
-                    <button onClick={() => setActiveTab('Financeiro')} className={`nav-link ${activeTab === 'Financeiro' ? 'active' : ''}`}>
-                        <TrendingUp size={18} /> Movimentação Financeira
-                    </button>
-                    <button onClick={() => setActiveTab('Relatórios')} className={`nav-link ${activeTab === 'Relatórios' ? 'active' : ''}`}>
-                        <BarChart3 size={18} /> Relatórios Estátisticos
-                    </button>
+                    {[
+                        { id: 'Visão Geral', icon: <LayoutDashboard size={18} /> },
+                        { id: 'Chamados', icon: <LifeBuoy size={18} /> },
+                        { id: 'Clientes', icon: <Users size={18} /> },
+                        { id: 'Gestão de Estoque', icon: <Monitor size={18} /> },
+                        { id: 'Financeiro', icon: <TrendingUp size={18} /> },
+                        { id: 'Relatórios', icon: <BarChart3 size={18} /> }
+                    ].map(tab => (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}>
+                            {tab.icon} {tab.id}
+                        </button>
+                    ))}
                 </nav>
 
                 <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid var(--border-main)' }}>
@@ -183,17 +352,13 @@ export default function Dashboard() {
                             <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ID: #001</p>
                         </div>
                     </div>
-                    <button className="nav-link">
-                        <Settings size={18} /> Administração
-                    </button>
+                    <button className="nav-link"><Settings size={18} /> Administração</button>
                 </div>
             </aside>
 
-            {/* Main Content Area */}
             <main className="main-view">
                 <header style={{ padding: '1.25rem 2rem', borderBottom: '1px solid var(--border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-surface)' }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{activeTab}</h2>
-
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         <div style={{ position: 'relative' }}>
                             <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -205,10 +370,7 @@ export default function Dashboard() {
                         </button>
                     </div>
                 </header>
-
-                <div style={{ flex: 1 }}>
-                    {renderContent()}
-                </div>
+                <div style={{ flex: 1 }}>{renderContent()}</div>
             </main>
         </div>
     );

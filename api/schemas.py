@@ -82,3 +82,39 @@ class ServiceOrder(ServiceOrderBase):
 
     class Config:
         from_attributes = True
+
+# Stock / Inventory
+class StockItemBase(BaseModel):
+    name: str
+    sku: Optional[str] = None
+    category: Optional[str] = None
+    quantity: float = 0
+    min_quantity: float = 0
+    unit_price: float = 0
+    location: Optional[str] = None
+
+class StockItemCreate(StockItemBase):
+    pass
+
+class StockItem(StockItemBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# Financial
+class FinancialEntryBase(BaseModel):
+    type: str # income, expense
+    category: Optional[str] = None
+    amount: float
+    description: Optional[str] = None
+    date: datetime = datetime.utcnow()
+    client_id: Optional[int] = None
+    supplier_id: Optional[int] = None
+
+class FinancialEntryCreate(FinancialEntryBase):
+    pass
+
+class FinancialEntry(FinancialEntryBase):
+    id: int
+    class Config:
+        from_attributes = True
