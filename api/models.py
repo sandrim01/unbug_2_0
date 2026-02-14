@@ -67,7 +67,7 @@ class ServiceOrder(Base):
     client = relationship("Client", back_populates="service_orders")
     
     tech_id = Column(Integer, ForeignKey("employees.id"))
-    # tech = relationship("Employee")
+    tech = relationship("Employee")
     
     created_at = Column(DateTime, default=datetime.utcnow)
     finished_at = Column(DateTime)
@@ -118,5 +118,10 @@ class Ticket(Base):
     
     client_id = Column(Integer, ForeignKey("clients.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
+    
+    # Guest info for public tickets
+    guest_name = Column(String)
+    guest_email = Column(String)
+    guest_phone = Column(String)
     
     created_at = Column(DateTime, default=datetime.utcnow)

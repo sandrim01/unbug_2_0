@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from api.config import settings
 from api.database import engine, Base, get_db
 from api.models import User, Employee
-from api.routes import auth
+from api.routes import auth, clients, tickets, service_orders
 import uvicorn
 import os
 import sys
@@ -29,6 +29,9 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router)
+app.include_router(clients.router)
+app.include_router(tickets.router)
+app.include_router(service_orders.router)
 
 @app.get("/api/health")
 async def health_check():
