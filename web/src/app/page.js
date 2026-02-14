@@ -313,14 +313,26 @@ export default function Dashboard() {
             case 'Relatórios':
                 return (
                     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        {/* Print Only Header */}
+                        <div className="report-header">
+                            <div>
+                                <h1 style={{ fontSize: '1.5rem', fontWeight: 900 }}>UNBUG ENTERPRISE ERP</h1>
+                                <p style={{ fontSize: '0.8rem' }}>Relatório Consolidado de Operações</p>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <p style={{ fontSize: '0.8rem' }}>Data de Emissão: {new Date().toLocaleDateString()}</p>
+                                <p style={{ fontSize: '0.7rem' }}>Ref: Fevereiro/2026</p>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }} className="no-print">
                             <div>
                                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>RELATÓRIOS ANALÍTICOS</h2>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Métricas de performance e saúde operacional.</p>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button className="nav-link" style={{ width: 'auto', background: 'var(--bg-elevated)', padding: '0.6rem 1rem' }}>Fevereiro, 2026</button>
-                                <button className="btn-primary" onClick={() => window.print()}>EXPORTAR RELATÓRIO PDF</button>
+                                <button className="btn-primary" onClick={() => window.print()}>EXPORTAR PDF PROFISSIONAL</button>
                             </div>
                         </div>
 

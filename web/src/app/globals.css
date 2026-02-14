@@ -198,3 +198,77 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--border-bright);
 }
+
+@media print {
+    body {
+        background-color: white !important;
+        color: black !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .sidebar,
+    .main-view header,
+    .btn-primary,
+    .nav-link,
+    button,
+    .no-print {
+        display: none !important;
+    }
+
+    .main-view {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .panel,
+    .stat-card {
+        background: white !important;
+        border: 1px solid #eee !important;
+        box-shadow: none !important;
+        color: black !important;
+        page-break-inside: avoid;
+    }
+
+    .dashboard-container {
+        display: block !important;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    p,
+    span,
+    td,
+    th {
+        color: black !important;
+    }
+
+    .badge {
+        border: 1px solid #ccc !important;
+        background: transparent !important;
+        color: black !important;
+    }
+
+    .data-table th {
+        background-color: #f8f9fa !important;
+        color: black !important;
+    }
+
+    .report-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #000;
+        padding-bottom: 1rem;
+    }
+}
+
+@media screen {
+    .report-header {
+        display: none;
+    }
+}
