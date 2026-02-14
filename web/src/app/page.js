@@ -310,6 +310,113 @@ export default function Dashboard() {
                         </div>
                     </div>
                 );
+            case 'Relatórios':
+                return (
+                    <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>RELATÓRIOS ANALÍTICOS</h2>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Métricas de performance e saúde operacional.</p>
+                            </div>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button className="nav-link" style={{ width: 'auto', background: 'var(--bg-elevated)', padding: '0.6rem 1rem' }}>Fevereiro, 2026</button>
+                                <button className="btn-primary" onClick={() => window.print()}>EXPORTAR RELATÓRIO PDF</button>
+                            </div>
+                        </div>
+
+                        {/* Analytic Stats */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+                            <div className="panel" style={{ padding: '2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>EFICIÊNCIA DE SUPORTE</span>
+                                    <TrendingUp size={16} color="var(--success)" />
+                                </div>
+                                <h3 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>{data.tickets.length > 0 ? ((data.tickets.filter(t => t.status === 'closed').length / data.tickets.length) * 100).toFixed(1) : '0'}%</h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Taxa de resolução de chamados</p>
+                            </div>
+                            <div className="panel" style={{ padding: '2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>TEMPO MÉDIO (SLA)</span>
+                                    <Clock size={16} color="var(--brand-primary)" />
+                                </div>
+                                <h3 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>1.8h</h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Resposta inicial em incidentes</p>
+                            </div>
+                            <div className="panel" style={{ padding: '2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>MARGEM FINANCEIRA</span>
+                                    <TrendingUp size={16} color="var(--success)" />
+                                </div>
+                                <h3 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                                    {((data.finance.reduce((acc, curr) => curr.type === 'income' ? acc + Number(curr.amount) : acc - Number(curr.amount), 0) / (data.finance.filter(f => f.type === 'income').reduce((acc, curr) => acc + Number(curr.amount), 0) || 1)) * 100).toFixed(1)}%
+                                </h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Lucratividade operacional</p>
+                            </div>
+                        </div>
+
+                        {/* Charts Area */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            <div className="panel" style={{ padding: '2rem' }}>
+                                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Distribuição Semanal de Demanda</h4>
+                                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '200px', padding: '0 1rem' }}>
+                                    {[35, 65, 45, 80, 55, 90, 40].map((h, i) => (
+                                        <div key={i} style={{ textAlign: 'center', width: '30px' }}>
+                                            <motion.div
+                                                initial={{ height: 0 }} animate={{ height: `${h}%` }}
+                                                style={{ width: '100%', background: i === 6 ? 'var(--brand-primary)' : 'var(--bg-elevated)', borderRadius: '4px', border: i === 6 ? 'none' : '1px solid var(--border-main)' }}
+                                            />
+                                            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.75rem', display: 'block' }}>{['S', 'T', 'Q', 'Q', 'S', 'S', 'D'][i]}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="panel" style={{ padding: '2rem' }}>
+                                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Categorias Financeiras</h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {[
+                                        { label: 'Serviços Cloud', val: 45, color: 'var(--brand-primary)' },
+                                        { label: 'Manutenção Hardware', val: 30, color: 'var(--success)' },
+                                        { label: 'Licenciamento SaaS', val: 15, color: 'var(--warning)' },
+                                        { label: 'Outros', val: 10, color: 'var(--text-muted)' }
+                                    ].map((cat, i) => (
+                                        <div key={i}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.5rem' }}>
+                                                <span style={{ color: 'var(--text-secondary)' }}>{cat.label}</span>
+                                                <span style={{ fontWeight: 600 }}>{cat.val}%</span>
+                                            </div>
+                                            <div style={{ height: '8px', background: 'var(--bg-elevated)', borderRadius: '4px', overflow: 'hidden' }}>
+                                                <motion.div initial={{ width: 0 }} animate={{ width: `${cat.val}%` }} style={{ height: '100%', background: cat.color }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Inventory Aging / Health */}
+                        <div className="panel" style={{ padding: '2rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1.5rem' }}>RESUMO DE ATIVOS EM ESTOQUE</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+                                <div>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>TOTAL DE ATIVOS</p>
+                                    <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>{data.inventory.reduce((acc, curr) => acc + Number(curr.quantity), 0)} un</p>
+                                </div>
+                                <div style={{ borderLeft: '1px solid var(--border-main)', paddingLeft: '1.5rem' }}>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>VALOR PATRIMONIAL</p>
+                                    <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>R$ {data.inventory.reduce((acc, curr) => acc + (Number(curr.quantity) * Number(curr.unit_price)), 0).toLocaleString()}</p>
+                                </div>
+                                <div style={{ borderLeft: '1px solid var(--border-main)', paddingLeft: '1.5rem' }}>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>ITENS ABAIXO DO MÍNIMO</p>
+                                    <p style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--error)' }}>2 SKUs</p>
+                                </div>
+                                <div style={{ borderLeft: '1px solid var(--border-main)', paddingLeft: '1.5rem' }}>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>GIRO DE ESTOQUE</p>
+                                    <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>4.2x</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
             default:
                 return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>Seção em desenvolvimento.</div>;
         }
