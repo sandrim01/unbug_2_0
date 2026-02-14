@@ -44,24 +44,54 @@ export default function Dashboard() {
 
     const fetchData = async () => {
         setLoading(true);
-        try {
-            const [tRes, cRes, iRes, fRes, pRes] = await Promise.all([
-                fetch('/api/tickets/'),
-                fetch('/api/clients/'),
-                fetch('/api/inventory/'),
-                fetch('/api/finance/'),
-                fetch('/api/projects/')
-            ]);
+        // Sample Data for visual consistency when DB is empty
+        const sampleData = {
+            tickets: [
+                { id: '8842', subject: 'Manutenção Servidor', priority: 'high', status: 'open', client_id: '1' },
+                { id: '8843', subject: 'Configuração VPN', priority: 'medium', status: 'pending', client_id: '2' }
+            ],
+            clients: [
+                { id: '1', name: 'Alpha Corp (Demo)', document: '12.345.678/0001-90', email: 'contact@alpha.com', status: 'active' },
+                { id: '2', name: 'Beta Systems (Demo)', document: '98.765.432/0001-10', email: 'info@beta.com', status: 'active' }
+            ],
+            inventory: [
+                { id: '101', name: 'Servidor Dell R740', sku: 'SRV-DEL-R740', quantity: 5, unit_price: '15000.00', location: 'Rack A1' }
+            ],
+            finance: [
+                { id: '201', date: new Date().toISOString(), type: 'income', amount: '10000.00', description: 'Serviços de Consultoria', category: 'Serviços' },
+                { id: '202', date: new Date().toISOString(), type: 'expense', amount: '1500.00', description: 'Aluguel Escritório', category: 'Despesas Fixas' }
+            ],
+            projects: [
+                { id: '301', name: 'Implantação ERP', start_date: '2026-01-15', end_date: '2026-03-30', status: 'active', client_id: '1' }
+            ]
+        };
 
-            setData({
-                tickets: await tRes.json() || [],
-                clients: await cRes.json() || [],
-                inventory: await iRes.json() || [],
-                finance: await fRes.json() || [],
-                projects: await pRes.json() || []
-            });
+        try {
+            const apiBase = window.location.port === '3000' ? 'http://localhost:8000' : '';
+            const urls = [
+                `${apiBase}/api/tickets/`,
+                `${apiBase}/api/clients/`,
+                `${apiBase}/api/inventory/`,
+                `${apiBase}/api/finance/`,
+                `${apiBase}/api/projects/`
+            ];
+
+            const results = await Promise.all(urls.map(url =>
+                fetch(url).then(res => res.ok ? res.json() : [])
+            ));
+
+            const [tickets, clients, inventory, finance, projects] = results;
+
+            // If all are empty, use sample data to keep the UI beautiful
+            const hasData = tickets.length > 0 || clients.length > 0 || inventory.length > 0 || finance.length > 0 || projects.length > 0;
+
+            setData(hasData ? {
+                tickets, clients, inventory, finance, projects
+            } : sampleData);
+
         } catch (error) {
-            console.error("Fetch error:", error);
+            console.error("Fetch error, using sample data:", error);
+            setData(sampleData);
         } finally {
             setLoading(false);
         }
@@ -69,13 +99,15 @@ export default function Dashboard() {
 
     const handleAction = async (e) => {
         e.preventDefault();
-        const endpoint = {
+        const apiBase = window.location.port === '3000' ? 'http://localhost:8000' : '';
+        const endpointMap = {
             client: '/api/clients/',
             ticket: '/api/tickets/',
             inventory: '/api/inventory/',
             finance: '/api/finance/',
             project: '/api/projects/'
-        }[modal.type];
+        };
+        const endpoint = `${apiBase}${endpointMap[modal.type]}`;
 
         try {
             const res = await fetch(endpoint, {
