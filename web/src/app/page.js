@@ -28,7 +28,8 @@ export default function Dashboard() {
         tickets: [],
         clients: [],
         inventory: [],
-        finance: []
+        finance: [],
+        projects: []
     });
     const [loading, setLoading] = useState(true);
 
@@ -44,39 +45,12 @@ export default function Dashboard() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            // Simulate API calls
-            const [tRes, cRes, iRes, fRes] = await Promise.all([
-                Promise.resolve({
-                    json: () => ([
-                        { id: '8842', subject: 'Manutenção Servidor', priority: 'high', status: 'open', client_id: '1' },
-                        { id: '8843', subject: 'Configuração VPN', priority: 'medium', status: 'pending', client_id: '2' },
-                        { id: '8844', subject: 'Upgrade Hardware', priority: 'low', status: 'closed', client_id: '3' }
-                    ])
-                }),
-                Promise.resolve({
-                    json: () => ([
-                        { id: '1', name: 'Alpha Corp', document: '12.345.678/0001-90', email: 'contact@alpha.com', status: 'active' },
-                        { id: '2', name: 'Beta Systems', document: '98.765.432/0001-10', email: 'info@beta.com', status: 'active' }
-                    ])
-                }),
-                Promise.resolve({
-                    json: () => ([
-                        { id: '101', name: 'Servidor Dell R740', sku: 'SRV-DEL-R740', quantity: 5, unit_price: '15000.00', location: 'Rack A1' },
-                        { id: '102', name: 'Switch Cisco Catalyst', sku: 'SW-CIS-CAT', quantity: 12, unit_price: '2500.00', location: 'Rack B2' }
-                    ])
-                }),
-                Promise.resolve({
-                    json: () => ([
-                        { id: '201', date: new Date().toISOString(), type: 'income', amount: '10000.00', description: 'Serviços de Consultoria', category: 'Serviços' },
-                        { id: '202', date: new Date().toISOString(), type: 'expense', amount: '1500.00', description: 'Aluguel Escritório', category: 'Despesas Fixas' }
-                    ])
-                }),
-                Promise.resolve({
-                    json: () => ([
-                        { id: '301', name: 'Implantação ERP', start_date: '2026-01-15', end_date: '2026-03-30', status: 'active', client_id: '1' },
-                        { id: '302', name: 'Atualização de Segurança', start_date: '2026-02-01', end_date: '2026-02-28', status: 'completed', client_id: '2' }
-                    ])
-                })
+            const [tRes, cRes, iRes, fRes, pRes] = await Promise.all([
+                fetch('/api/tickets/'),
+                fetch('/api/clients/'),
+                fetch('/api/inventory/'),
+                fetch('/api/finance/'),
+                fetch('/api/projects/')
             ]);
 
             setData({
@@ -104,15 +78,23 @@ export default function Dashboard() {
         }[modal.type];
 
         try {
-            // Simulate API call
-            console.log(`Submitting to ${endpoint}:`, form);
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
 
-            setModal({ show: false, type: null });
-            setForm({});
-            fetchData(); // Re-fetch data to update UI
+            if (res.ok) {
+                setModal({ show: false, type: null });
+                setForm({});
+                fetchData();
+            } else {
+                const errData = await res.json();
+                alert(`Erro: ${errData.detail || "Falha na operação"}`);
+            }
         } catch (error) {
-            alert("Erro ao salvar dados.");
+            console.error("Action error:", error);
+            alert("Erro crítico na comunicação com o servidor.");
         }
     };
 
