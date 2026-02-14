@@ -70,6 +70,12 @@ export default function Dashboard() {
                         { id: '201', date: new Date().toISOString(), type: 'income', amount: '10000.00', description: 'Serviços de Consultoria', category: 'Serviços' },
                         { id: '202', date: new Date().toISOString(), type: 'expense', amount: '1500.00', description: 'Aluguel Escritório', category: 'Despesas Fixas' }
                     ])
+                }),
+                Promise.resolve({
+                    json: () => ([
+                        { id: '301', name: 'Implantação ERP', start_date: '2026-01-15', end_date: '2026-03-30', status: 'active', client_id: '1' },
+                        { id: '302', name: 'Atualização de Segurança', start_date: '2026-02-01', end_date: '2026-02-28', status: 'completed', client_id: '2' }
+                    ])
                 })
             ]);
 
@@ -77,7 +83,8 @@ export default function Dashboard() {
                 tickets: await tRes.json() || [],
                 clients: await cRes.json() || [],
                 inventory: await iRes.json() || [],
-                finance: await fRes.json() || []
+                finance: await fRes.json() || [],
+                projects: await pRes.json() || []
             });
         } catch (error) {
             console.error("Fetch error:", error);
@@ -92,7 +99,8 @@ export default function Dashboard() {
             client: '/api/clients/',
             ticket: '/api/tickets/',
             inventory: '/api/inventory/',
-            finance: '/api/finance/'
+            finance: '/api/finance/',
+            project: '/api/projects/'
         }[modal.type];
 
         try {
@@ -116,7 +124,7 @@ export default function Dashboard() {
             <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
                 <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="panel" style={{ width: '500px', padding: '2.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>ADICIONAR {modal.type?.toUpperCase()}</h2>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>ADICIONAR {modal.type === 'project' ? 'PROJETO' : modal.type?.toUpperCase()}</h2>
                         <button onClick={() => setModal({ show: false })} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>Fechar</button>
                     </div>
                     <form onSubmit={handleAction} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -166,6 +174,32 @@ export default function Dashboard() {
                                 <input placeholder="Categoria (Ex: Aluguel, Hardware)" className="input-field" onChange={e => setForm({ ...form, category: e.target.value })} />
                             </>
                         )}
+                        {modal.type === 'project' && (
+                            <>
+                                <input required placeholder="Nome do Projeto" className="input-field" onChange={e => setForm({ ...form, name: e.target.value })} />
+                                <textarea required rows={3} placeholder="Descrição do Escopo" className="input-field" style={{ resize: 'none' }} onChange={e => setForm({ ...form, description: e.target.value })} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>INÍCIO</label>
+                                        <input type="date" className="input-field" onChange={e => setForm({ ...form, start_date: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.25rem', display: 'block' }}>PREVISÃO FIM</label>
+                                        <input type="date" className="input-field" onChange={e => setForm({ ...form, end_date: e.target.value })} />
+                                    </div>
+                                </div>
+                                <select required className="input-field" onChange={e => setForm({ ...form, client_id: e.target.value })}>
+                                    <option value="">Cliente Associado</option>
+                                    {data.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                                <select className="input-field" onChange={e => setForm({ ...form, status: e.target.value })}>
+                                    <option value="planning">Planejamento</option>
+                                    <option value="active">Em Desenvolvimento</option>
+                                    <option value="on_hold">Em Espera</option>
+                                    <option value="completed">Finalizado</option>
+                                </select>
+                            </>
+                        )}
                         <button type="submit" className="btn-primary" style={{ padding: '1rem', marginTop: '1rem' }}>SALVAR REGISTRO</button>
                     </form>
                 </motion.div>
@@ -182,7 +216,7 @@ export default function Dashboard() {
                     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
                             {[
-                                { label: 'Chamados Ativos', value: data.tickets.filter(t => t.status === 'open').length, trend: 'Live', color: '#2563eb' },
+                                { label: 'Projetos Ativos', value: data.projects.filter(p => p.status === 'active').length, trend: 'Roadmap', color: '#2563eb' },
                                 { label: 'Base de Clientes', value: data.clients.length, trend: 'Total', color: '#10b981' },
                                 { label: 'Itens em Estoque', value: data.inventory.length, trend: 'SKUs', color: '#6366f1' },
                                 { label: 'Saldo Mensal', value: `R$ ${data.finance.reduce((acc, curr) => curr.type === 'income' ? acc + Number(curr.amount) : acc - Number(curr.amount), 0).toFixed(2)}`, trend: 'Ref: Fev/26', color: '#f59e0b' }
@@ -199,19 +233,18 @@ export default function Dashboard() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
                             <div className="panel" style={{ padding: '1.5rem' }}>
-                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.5rem' }}>FILA DE TRABALHO (CHAMADOS)</h3>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.5rem' }}>CRONOGRAMA DE PROJETOS</h3>
                                 <table className="data-table">
-                                    <thead><tr><th>Ref</th><th>Assunto</th><th>Prioridade</th><th>Status</th></tr></thead>
+                                    <thead><tr><th>Projeto</th><th>Status</th><th>Entrega</th></tr></thead>
                                     <tbody>
-                                        {data.tickets.slice(0, 5).map((t, i) => (
+                                        {data.projects.slice(0, 5).map((p, i) => (
                                             <tr key={i}>
-                                                <td style={{ fontWeight: 700 }}>#{t.id}</td>
-                                                <td>{t.subject}</td>
-                                                <td><span className={`badge badge-${t.priority === 'high' ? 'red' : 'blue'}`}>{t.priority}</span></td>
-                                                <td>{t.status}</td>
+                                                <td style={{ fontWeight: 700 }}>{p.name}</td>
+                                                <td><span className={`badge badge-${p.status === 'active' ? 'blue' : 'zinc'}`}>{p.status}</span></td>
+                                                <td>{p.end_date ? new Date(p.end_date).toLocaleDateString() : 'TBD'}</td>
                                             </tr>
                                         ))}
-                                        {data.tickets.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>Nenhum chamado pendente</td></tr>}
+                                        {data.projects.length === 0 && <tr><td colSpan="3" style={{ textAlign: 'center', padding: '2rem' }}>Nenhum projeto em andamento</td></tr>}
                                     </tbody>
                                 </table>
                             </div>
@@ -229,7 +262,7 @@ export default function Dashboard() {
                                     </div>
                                     <div style={{ padding: '1rem', background: 'rgba(37, 99, 235, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(37, 99, 235, 0.1)' }}>
                                         <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                            <strong>Nota de Operação:</strong> Todos os clusters de banco de dados operando nominalmente sem latência reportada.
+                                            <strong>Nota de Operação:</strong> Todos os clusters de banco de dados operando nominalmente.
                                         </p>
                                     </div>
                                 </div>
@@ -240,10 +273,11 @@ export default function Dashboard() {
             case 'Chamados':
             case 'Clientes':
             case 'Financeiro':
-            case 'Gestão de Estoque': // Matching current nav or mapping
-                const typeMap = { 'Chamados': 'ticket', 'Clientes': 'client', 'Financeiro': 'finance', 'Gestão de Estoque': 'inventory' };
+            case 'Gestão de Estoque':
+            case 'Projetos': // Matching current nav or mapping
+                const typeMap = { 'Chamados': 'ticket', 'Clientes': 'client', 'Financeiro': 'finance', 'Gestão de Estoque': 'inventory', 'Projetos': 'project' };
                 const currentType = typeMap[activeTab] || 'client';
-                const currentData = data[currentType === 'ticket' ? 'tickets' : currentType === 'client' ? 'clients' : currentType === 'finance' ? 'finance' : 'inventory'] || [];
+                const currentData = data[currentType === 'ticket' ? 'tickets' : currentType === 'client' ? 'clients' : currentType === 'finance' ? 'finance' : currentType === 'project' ? 'projects' : 'inventory'] || [];
 
                 return (
                     <div style={{ padding: '2rem' }}>
@@ -264,6 +298,7 @@ export default function Dashboard() {
                                     {currentType === 'ticket' && <tr><th>ID</th><th>Assunto</th><th>Prioridade</th><th>Status</th></tr>}
                                     {currentType === 'inventory' && <tr><th>Item</th><th>SKU</th><th>Quantidade</th><th>Preço</th></tr>}
                                     {currentType === 'finance' && <tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Descrição</th></tr>}
+                                    {currentType === 'project' && <tr><th>Projeto</th><th>Início</th><th>Previsão Fim</th><th>Status</th></tr>}
                                 </thead>
                                 <tbody>
                                     {currentData.map((item, i) => (
@@ -302,9 +337,17 @@ export default function Dashboard() {
                                                     <td>{item.description}</td>
                                                 </>
                                             )}
+                                            {currentType === 'project' && (
+                                                <>
+                                                    <td style={{ fontWeight: 700 }}>{item.name}</td>
+                                                    <td>{item.start_date ? new Date(item.start_date).toLocaleDateString() : '-'}</td>
+                                                    <td>{item.end_date ? new Date(item.end_date).toLocaleDateString() : '-'}</td>
+                                                    <td><span className={`badge badge-${item.status === 'active' ? 'blue' : item.status === 'completed' ? 'green' : 'zinc'}`}>{item.status}</span></td>
+                                                </>
+                                            )}
                                         </tr>
                                     ))}
-                                    {currentData.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>Nenhum registro encontrado.</td></tr>}
+                                    {currentData.length === 0 && <tr><td colSpan="5" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>Nenhum registro encontrado.</td></tr>}
                                 </tbody>
                             </table>
                         </div>
@@ -451,6 +494,7 @@ export default function Dashboard() {
                 <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     {[
                         { id: 'Visão Geral', icon: <LayoutDashboard size={18} /> },
+                        { id: 'Projetos', icon: <Monitor size={18} /> },
                         { id: 'Chamados', icon: <LifeBuoy size={18} /> },
                         { id: 'Clientes', icon: <Users size={18} /> },
                         { id: 'Gestão de Estoque', icon: <Monitor size={18} /> },

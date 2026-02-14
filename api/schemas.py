@@ -118,3 +118,20 @@ class FinancialEntry(FinancialEntryBase):
     id: int
     class Config:
         from_attributes = True
+
+# Projects
+class ProjectBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    status: str = "planning"
+    client_id: int
+
+class ProjectCreate(ProjectBase):
+    pass
+
+class Project(ProjectBase):
+    id: int
+    class Config:
+        from_attributes = True

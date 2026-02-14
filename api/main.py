@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from api.config import settings
 from api.database import engine, Base, get_db
 from api.models import User, Employee
-from api.routes import auth, clients, tickets, service_orders, inventory, finance
+from api.routes import auth, clients, tickets, service_orders, inventory, finance, projects
 import uvicorn
 import os
 import sys
@@ -34,6 +34,7 @@ app.include_router(tickets.router)
 app.include_router(service_orders.router)
 app.include_router(inventory.router)
 app.include_router(finance.router)
+app.include_router(projects.router)
 
 @app.get("/api/health")
 async def health_check():
